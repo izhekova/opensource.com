@@ -11,7 +11,7 @@ FABRIC="$MARCH-$VERSION"
 BIN="$ARCH-$VERSION"
 SLEEP_TIMEOUT=10
 
-ORG_DOMAIN="org1.example.com"
+ORG_DOMAIN="org1.taulia.com"
 
 if [ ! "$(docker images | grep hyperledger/fabric )" ]; then
  docker pull hyperledger/fabric-peer:$FABRIC
@@ -21,7 +21,7 @@ if [ ! "$(docker images | grep hyperledger/fabric )" ]; then
  docker pull hyperledger/fabric-couchdb:$FABRIC
 fi
 
-if [ ! -d "bin"]; then
+if [ ! -d "bin" ]; then
     curl https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric/${BIN}/hyperledger-fabric-${BIN}.tar.gz | tar xz
 fi
 
@@ -31,12 +31,12 @@ sleep $SLEEP_TIMEOUT
 
 sleep $SLEEP_TIMEOUT
 
-KEYSTORE=`ls ./crypto-config/peerOrganizations/$ORG_DOMAIN/users/Admin@$ORG_DOMAIN/msp/keystore`
-composer identity import \
--p hlfv1 \
--u Admin@$ORG_DOMAIN \
--c ./crypto-config/peerOrganizations/$ORG_DOMAIN/users/Admin@$ORG_DOMAIN/msp/signcerts/Admin@$ORG_DOMAIN-cert.pem \
--k ./crypto-config/peerOrganizations/$ORG_DOMAIN/users/Admin@$ORG_DOMAIN/msp/keystore/$KEYSTORE
+#  KEYSTORE=`ls ./crypto-config/peerOrganizations/$ORG_DOMAIN/users/Admin@$ORG_DOMAIN/msp/keystore`
+#  composer identity import \
+#  -p hlfv1 \
+#  -u Admin@$ORG_DOMAIN \
+#  -c ./crypto-config/peerOrganizations/$ORG_DOMAIN/users/Admin@$ORG_DOMAIN/msp/signcerts/Admin@$ORG_DOMAIN-cert.pem \
+#  -k ./crypto-config/peerOrganizations/$ORG_DOMAIN/users/Admin@$ORG_DOMAIN/msp/keystore/$KEYSTORE
 
 sleep $SLEEP_TIMEOUT
 
@@ -50,4 +50,3 @@ mkdir -p $OUTPUT_DIR
 ./bin/configtxgen -profile TwoOrgsChannel -outputCreateChannelTx $OUTPUT_DIR/orderer-channel.tx -channelID mychannel
 
 echo "... 🙌🏿"
-  
