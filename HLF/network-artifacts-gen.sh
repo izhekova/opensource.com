@@ -11,7 +11,7 @@ FABRIC="$MARCH-$VERSION"
 BIN="$ARCH-$VERSION"
 SLEEP_TIMEOUT=10
 
-ORG_DOMAIN="org1.taulia.com"
+ORG_DOMAIN="blockchain-network.com"
 
 if [ ! "$(docker images | grep hyperledger/fabric )" ]; then
  docker pull hyperledger/fabric-peer:$FABRIC
