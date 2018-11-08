@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: peer0.{{ .Values.fabricOrg.domain }}
+  name: peer0.{{ .Values.fabricOrg.domain2 }}
   namespace: {{ .Values.namespace }}
 spec:
-  loadBalancerIP: {{ .Values.ingress.addr }}
+  loadBalancerIP: {{ .Values.ingress.addr2 }}
   externalIPs:
-  - {{ .Values.ingress.addr }}
+  - {{ .Values.ingress.addr2 }}
   ports:
   - name: "requests"
     port: 7051
@@ -15,30 +15,30 @@ spec:
     port: 7053
     protocol: TCP
   selector:
-    service: peer0.{{ .Values.fabricOrg.domain }}
+    service: peer0.{{ .Values.fabricOrg.domain2 }}
   type: LoadBalancer
 ---
 apiVersion: v1
 kind: ReplicationController
 metadata:
   labels:
-    service: peer0.{{ .Values.fabricOrg.domain }}
-  name: peer0.{{ .Values.fabricOrg.domain }}
+    service: peer0.{{ .Values.fabricOrg.domain2 }}
+  name: peer0.{{ .Values.fabricOrg.domain2 }}
   namespace: {{ .Values.namespace }}
 spec:
   replicas: 1
   selector:
-    service: peer0.{{ .Values.fabricOrg.domain }}
+    service: peer0.{{ .Values.fabricOrg.domain2 }}
   template:
     metadata:
       labels:
-        service: peer0.{{ .Values.fabricOrg.domain }}
+        service: peer0.{{ .Values.fabricOrg.domain2 }}
       namespace: {{ .Values.namespace }}
     spec:
       hostAliases:
-      - ip: "{{ .Values.fabricOrderer.addr }}"
+      - ip: "{{ .Values.fabricOrderer.addr2 }}"
         hostnames:
-        - "peer0.{{ .Values.fabricOrg.domain }}"
+        - "peer0.{{ .Values.fabricOrg.domain2 }}"
       containers:
       - command:
         - peer
@@ -50,13 +50,13 @@ spec:
         - name: CORE_LOGGING_LEVEL
           value: DEBUG
         - name: CORE_PEER_ID
-          value: peer0.{{ .Values.fabricOrg.domain }}
+          value: peer0.{{ .Values.fabricOrg.domain2 }}
         - name: CORE_PEER_ADDRESS
           value: {{ .Values.ingress.addr }}:7051
         - name: CORE_PEER_GOSSIP_EXTERNALENDPOINT
           value: {{ .Values.ingress.addr }}:7051
         - name: CORE_PEER_MSPCONFIGPATH
-          value: /etc/crypto-config/opensource.com/HLF/crypto-config/peerOrganizations/{{ .Values.fabricOrg.domain }}/peers/peer0.{{ .Values.fabricOrg.domain }}/msp
+          value: /etc/crypto-config/opensource.com/HLF/crypto-config/peerOrganizations/{{ .Values.fabricOrg.domain2 }}/peers/peer0.{{ .Values.fabricOrg.domain }}/msp
         - name: CORE_PEER_LOCALMSPID
           value: {{ .Values.fabricOrg.msp }}
         image: {{ .Values.fabricPeer.image }}:{{ .Values.fabricPeer.tag }}

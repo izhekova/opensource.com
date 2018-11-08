@@ -14,15 +14,17 @@ service:
   internalPort: 80
 fabricOrderer:
   addr: 35.193.151.88
-  orgDomain: blockchain-network.com
+  orgDomain: orderer.blockchain-network.com
   replicas: 1
   image: hyperledger/fabric-orderer
   tag: *fabricTag
   consensusType: solo
   msp: OrdererMSP
 fabricOrg:
-  domain: org1.taulia.com
-  msp: Org1MSP
+  domain: taulia.blockchain-network.com
+  domain2: funder.blockchain-network.com
+  msp: TauliaMSP
+  msp2: FunderMSP
 fabricCa:
   keyStoreHash: c4d6886fb9125ae7c69acbfcb965eeed7b7d39c0ce65293b369175aa3635cdaf
   image: hyperledger/fabric-ca
@@ -36,6 +38,7 @@ ingress:
   hosts:
     - blockchain-network.com
   addr: 35.193.151.88
+  addr2: 35.188.42.55
   annotations:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"

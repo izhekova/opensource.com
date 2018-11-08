@@ -74,7 +74,7 @@ Organizations:
     - &Org2
         # DefaultOrg defines the organization which is used in the sampleconfig
         # of the fabric.git development environment
-        Name: FinderMSP
+        Name: FunderMSP
 
         # ID to load the MSP definition as
         ID: FunderMSP
