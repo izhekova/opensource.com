@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: peer0.{{ .Values.fabricOrg.domain }}
+  name: peer0
   namespace: {{ .Values.namespace }}
 spec:
   loadBalancerIP: {{ .Values.ingress.addr }}
@@ -15,24 +15,24 @@ spec:
     port: 7053
     protocol: TCP
   selector:
-    service: peer0.{{ .Values.fabricOrg.domain }}
+    service: {{ .Release.Name }}-peer0
   type: LoadBalancer
 ---
 apiVersion: v1
 kind: ReplicationController
 metadata:
   labels:
-    service: peer0.{{ .Values.fabricOrg.domain }}
-  name: peer0.{{ .Values.fabricOrg.domain }}
+    service: {{ .Release.Name }}-peer0
+  name: {{ .Release.Name }}-peer0-taulia
   namespace: {{ .Values.namespace }}
 spec:
   replicas: 1
   selector:
-    service: peer0.{{ .Values.fabricOrg.domain }}
+    service: {{ .Release.Name }}-peer0
   template:
     metadata:
       labels:
-        service: peer0.{{ .Values.fabricOrg.domain }}
+        service: {{ .Release.Name }}-peer0
       namespace: {{ .Values.namespace }}
     spec:
       hostAliases:
@@ -60,36 +60,119 @@ spec:
         - name: CORE_PEER_LOCALMSPID
           value: {{ .Values.fabricOrg.msp }}
         image: {{ .Values.fabricPeer.image }}:{{ .Values.fabricPeer.tag }}
-        name: peer0.{{ .Values.fabricOrg.domain }}
+        name: peer0-taulia
         workingDir: /opt/gopath/src/github.com/hyperledger/fabric
         ports:
         - containerPort: 7051
         - containerPort: 7053
         volumeMounts:
         - mountPath: /var/run/docker.sock
-          name: {{ .Release.Name }}-docker-sock
+          name: docker-sock-peer0-taulia
         - mountPath: /etc/crypto-config
-          name: {{ .Release.Name }}-crypto-config
+          name: crypto-config-peer0-taulia
           readOnly: true
         - mountPath: /var/hyperledger/production
-          name: {{ .Release.Name }}-fabric
+          name: fabric-peer0-taulia
       volumes:
-      - name: {{ .Release.Name }}-docker-sock
+      - name: docker-sock-peer0-taulia
         hostPath:
           path: /var/run/docker.sock
-      - name: {{ .Release.Name }}-fabric
+      - name: fabric-peer0-taulia
         persistentVolumeClaim:
-          claimName: {{ .Release.Name }}-peer0-pvc
-      - name: {{ .Release.Name }}-crypto-config
+          claimName: peer0-pvc-taulia
+      - name: crypto-config-peer0-taulia
 {{ toYaml .Values.cryptoConfigMount | indent 8 }}
+
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  labels:
+    service: {{ .Release.Name }}-peer0
+  name: {{ .Release.Name }}-peer0-funder
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    service: {{ .Release.Name }}-peer0
+  template:
+    metadata:
+      labels:
+        service: {{ .Release.Name }}-peer0
+      namespace: {{ .Values.namespace }}
+    spec:
+      hostAliases:
+      - ip: "{{ .Values.fabricOrderer.addr }}"
+        hostnames:
+        - "peer0.{{ .Values.fabricOrg.domain2 }}"
+      containers:
+      - command:
+        - peer
+        - node
+        - start
+        env:
+        - name: CORE_VM_ENDPOINT
+          value: unix:///var/run/docker.sock
+        - name: CORE_LOGGING_LEVEL
+          value: DEBUG
+        - name: CORE_PEER_ID
+          value: peer0.{{ .Values.fabricOrg.domain2 }}
+        - name: CORE_PEER_ADDRESS
+          value: {{ .Values.ingress.addr }}:7051
+        - name: CORE_PEER_GOSSIP_EXTERNALENDPOINT
+          value: {{ .Values.ingress.addr }}:7051
+        - name: CORE_PEER_MSPCONFIGPATH
+          value: /etc/crypto-config/opensource.com/HLF/crypto-config/peerOrganizations/{{ .Values.fabricOrg.domain2 }}/peers/peer0.{{ .Values.fabricOrg.domain2 }}/msp
+        - name: CORE_PEER_LOCALMSPID
+          value: {{ .Values.fabricOrg.msp }}
+        image: {{ .Values.fabricPeer.image }}:{{ .Values.fabricPeer.tag }}
+        name: peer0-funder
+        workingDir: /opt/gopath/src/github.com/hyperledger/fabric
+        ports:
+        - containerPort: 7051
+        - containerPort: 7053
+        volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker-sock-peer0-funder
+        - mountPath: /etc/crypto-config
+          name: crypto-config-peer0-funder
+          readOnly: true
+        - mountPath: /var/hyperledger/production
+          name: fabric-peer0-funder
+      volumes:
+      - name: docker-sock-peer0-funder
+        hostPath:
+          path: /var/run/docker.sock
+      - name: fabric-peer0-funder
+        persistentVolumeClaim:
+          claimName: peer0-pvc-funder
+      - name: crypto-config-peer0-funder
+{{ toYaml .Values.cryptoConfigMount | indent 8 }}
+
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{ .Release.Name }}-peer0-pvc
+  name: peer0-pvc-taulia
   namespace: {{ .Values.namespace }}
   labels:
-    app: {{ .Release.Name }}-peer0-pvc
+    app: peer0-pvc-taulia
+spec:
+  storageClassName: standard
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: peer0-pvc-funder
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: peer0-pvc-funder
 spec:
   storageClassName: standard
   accessModes:

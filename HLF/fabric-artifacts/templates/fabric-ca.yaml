@@ -61,7 +61,7 @@ spec:
         volumeMounts:
         - mountPath: /etc/crypto-config
           name: {{ .Release.Name }}-crypto-config
-          readOnly: true
+          readOnly: false
       volumes:
       - name: {{ .Release.Name }}-crypto-config
 {{ toYaml .Values.cryptoConfigMount | indent 8 }}
